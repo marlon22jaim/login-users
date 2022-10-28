@@ -170,6 +170,11 @@ En este momento podemos ir a la ruta http://127.0.0.1:8000/api/1.0/persona/ y ag
 - Vamos a la carpeta del proyecto y luego al archivo settings.py alli aremos lo siguiente
 
 ```python
+INSTALLED_APPS = [
+    "rest_framework.authtoken",
+
+]
+
 REST_FRAMEWORK = {
     # este sera el metodo de autenticacion usado para las clases asociadas a una ruta
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -184,3 +189,26 @@ REST_FRAMEWORK = {
 ```
 
 Ahora las rutas estan protegidas
+
+- vamos a la carpeta del projecto y en el archivo urls.py hacemos lo siguiente
+
+```python
+from django.contrib import admin
+from django.urls import path, include
+from rest_framework.authtoken import views
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    # include recibe tuplas
+    path("api/1.0/", include(("api.urls","api"))),
+    # hacemos una peticion a la vista view y nos responderá con un token creado para el usuario correspondiente
+    path("api_generate_token/", views.obtain_auth_token),
+]
+```
+
+###### Debido a que necesitamos agregar los campos de authtoken debemos hacer otra vez migraciones
+
+`python3 manage.py migrate`
+
+Esto nos crea una tabla nueva llamada authtoken_token en la DB
+
