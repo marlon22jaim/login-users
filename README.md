@@ -211,4 +211,5 @@ urlpatterns = [
 `python3 manage.py migrate`
 
 Esto nos crea una tabla nueva llamada authtoken_token en la DB
+ y podemos probrar en postman
 
