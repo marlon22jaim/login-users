@@ -61,10 +61,11 @@ from django.db import models
 class Persona(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField("Nombre", max_length=100)
-    apellido = models.CharField("Apellido", max_lenght=200)
+    apellido = models.CharField("Apellido", max_length=200)
 
     # sirve para una vista por defecto para cada instancia del modelo persona
     def __str__(self):
+        # vista desde el admin
         return "{0}, {1}".format(self.apellido, self.name)
 ```
 
@@ -88,5 +89,98 @@ admin.site.register(Persona)
 ```
 
 - vamos a crear un super admin
- ` python3 manage.py createsuperuser`
+ `python3 manage.py createsuperuser`
 
+- vamos al admin y agregamos personas
+http://127.0.0.1:8000/admin/
+
+### Creando serializer y vista
+- vamos a la carpeta de la aplicacion y creamos un archivo llamado serializers.py
+
+** UN SERIALIZADOR ES UN CONVERTIDOR DE  DATA A UN TIPO JSON
+SERIALIZAREMOS NUESTRO MODELO PARA CREAR UNA API PARA PODER FORMATEARLO**
+
+```python
+from rest_framework import serializers
+from .models import Persona
+
+# creamos un serializador
+
+
+class PersonaSerializer(serializers.ModelSerializer):
+    class Meta:
+        # indicamos el modelo
+        model = Persona
+        # indicamos los campos que deseo, son de la DB y del modelo
+        fields = (
+            "id",
+            "name",
+            "apellido",
+        )
+
+```
+
+Ahora necesitamos una vista que nos muestre el listado de mis personas registradas en la DB
+
+- vamos a la carpeta de la aplicacion e ingresamos al archivo views.py
+
+```python
+from rest_framework import generics
+from .models import Persona
+from .serializers import PersonaSerializer
+
+
+# Create your views here.
+# ListCreateApiView para poder crear y no solo ver
+class PersonaList(generics.ListCreateAPIView):
+    # consulta, trae todas las personas
+    queryset = Persona.objects.all()
+    # indicamos que modelo serializador voy a usar
+    serializer_class = PersonaSerializer
+```
+### Creando rutas
+- En la carpeta de la app vamos a crear un archivo llamado urls.py
+
+```python
+from django.urls import path
+from .views import PersonaList
+
+
+urlpatterns = [
+    # as_view porque es una vista basada en clase
+    path("persona/", PersonaList.as_view(), name="persona_list"),
+]
+```
+
+- ahora en la carpeta del projectos vamos al archivo de rutas urls.py y enlazamos los archivos de rutas de mi app y mi proyecto
+
+```python
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    # include recibe tuplas
+    path("api/1.0/", include(("api.urls","api"))),
+]
+```
+En este momento podemos ir a la ruta http://127.0.0.1:8000/api/1.0/persona/ y agregar personas nuevas (Solo para probar)
+
+ #### Configurando autenticación
+- Vamos a la carpeta del proyecto y luego al archivo settings.py alli aremos lo siguiente
+
+```python
+REST_FRAMEWORK = {
+    # este sera el metodo de autenticacion usado para las clases asociadas a una ruta
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+    ),
+    # verificar que se haya iniciado sesion antes de poder acceder y mostrar los datos del API
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+}
+
+```
+
+Ahora las rutas estan protegidas

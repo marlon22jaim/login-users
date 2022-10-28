@@ -10,4 +10,5 @@ class Persona(models.Model):
 
     # sirve para una vista por defecto para cada instancia del modelo persona
     def __str__(self):
+        # vista desde el admin
         return "{0}, {1}".format(self.apellido, self.name)

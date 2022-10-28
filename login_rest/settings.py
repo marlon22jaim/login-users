@@ -42,6 +42,17 @@ INSTALLED_APPS = [
     "api"
 ]
 
+REST_FRAMEWORK = {
+    # este sera el metodo de autenticacion usado para las clases asociadas a una ruta
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+    ),
+    # verificar que se haya iniciado sesion antes de poder acceder y mostrar los datos del API
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
